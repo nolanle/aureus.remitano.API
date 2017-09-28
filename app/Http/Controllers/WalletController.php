@@ -7,6 +7,7 @@ use App\Aureus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Transaction;
+use App\Http\Requests\WithdrawRequest;
 
 class WalletController extends Controller
 {
@@ -52,6 +53,55 @@ class WalletController extends Controller
         return response()->json([
             'address' => $address
         ], 200);
+    }
+
+    protected function getWithdrawFee(){
+        return response()->json([
+            'fee' => config('constants.withdraw_fee')
+        ], 200);
+    }
+
+    protected function withdraw(WithdrawRequest $request){
+        $amount = (double)$request->amount;
+        $address = $request->address;
+        if ($amount + (double)config('constants.withdraw_fee') <= Auth::user()->balance) {
+
+            $validate = $this->crypto->validateaddress($address);
+            if($validate['isvalid']){
+
+                $response = $this->crypto->sendtoaddress($address, $amount);
+                if ($response != false) {
+                    
+                    Auth::user()->balance -= $amount + (double)config('constants.withdraw_fee');
+                    Auth::user()->save();
+
+                    // save transaction
+                    $transaction = $this->crypto->gettransaction($response);
+                    $sent = Transaction::forceCreate($transaction);
+
+                    // response to client
+                    return response()->json([
+                        'status' => true,
+                        'address' => $address,
+                        'amount' => $amount,
+                        'fee' => (double)config('constants.withdraw_fee'),
+                        'transaction' => $sent,
+                    ], 200);
+                }
+                return response()->json([
+                    'status' => false,
+                    'message' => 'System Error',
+                ], 400);
+            }
+            return response()->json([
+                'status' => false,
+                'message' => 'Aureus address invalid',
+            ], 400);
+        }
+        return response()->json([
+            'status' => false,
+            'message' => 'Insufficient funds',
+        ], 400);
     }
 
     protected function updateBalance(){ // AG3TqTKPw1SviKjAWFNtQMimq4sWZSgUMD

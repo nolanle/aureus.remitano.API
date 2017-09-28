@@ -52,16 +52,17 @@ class UpdateUserBalanceCommand extends Command
                 if($transactionStored == null){
                     foreach ($addresses as $address) {
                         if($transaction['address'] == $address->address && $transaction['category'] == 'receive'){
-                            $transactionStored = new Transaction();
-                            $transactionStored->txid        = $transaction['txid'];
-                            $transactionStored->address     = $transaction['address'];
-                            $transactionStored->category    = $transaction['category'];
-                            $transactionStored->amount      = $transaction['amount'];
-                            $transactionStored->blockhash   = $transaction['blockhash'];
-                            $transactionStored->blocktime   = $transaction['blocktime'];
-                            $transactionStored->save();
-                            // array_push($result, $transaction);
-                            $user->addMoney($transactionStored->amount);
+                            // $transactionStored = new Transaction();
+                            // $transactionStored->txid        = $transaction['txid'];
+                            // $transactionStored->address     = $transaction['address'];
+                            // $transactionStored->category    = $transaction['category'];
+                            // $transactionStored->amount      = $transaction['amount'];
+                            // $transactionStored->blockhash   = $transaction['blockhash'];
+                            // $transactionStored->blocktime   = $transaction['blocktime'];
+                            // $transactionStored->save();
+                            // $user->addMoney($transactionStored->amount);
+                            $crypto->gettransaction($transaction['txid']);
+                            $user->addMoney($transaction['amount']);
                         }
                     }
                 }
