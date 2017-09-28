@@ -12,9 +12,9 @@
 */
 
 Route::get('/', function () {
+    //$user = \App\User::find('hoanglek13@gmail.com');
+    //dd($user);
     return view('welcome');
 });
-
-Auth::routes();
-
-Route::get('/home', 'HomeController@index')->name('home');
+// Auth::routes();
+// Route::get('/home', 'HomeController@index')->name('home');

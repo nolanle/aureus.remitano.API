@@ -37,6 +37,18 @@ class User extends Model implements
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token', 'updated_at', 'created_at'
     ];
+
+    public function addresses(){
+        return $this->hasMany(Address::class);
+    }
+
+
+    public function addMoney($amount=0){
+        $this->balance += $amount;
+        $this->save();
+        return $this->balance;
+    }
+
 }

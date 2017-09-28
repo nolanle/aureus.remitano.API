@@ -179,7 +179,7 @@ return [
 
         Jenssegers\Mongodb\MongodbServiceProvider::class,
         MoeenBasra\LaravelPassportMongoDB\PassportServiceProvider::class,
-
+        Barryvdh\Cors\ServiceProvider::class,
     ],
 
     /*
