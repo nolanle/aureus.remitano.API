@@ -26,7 +26,7 @@ class WalletController extends Controller
     protected function getBalance(){
         //$balance = $this->crypto->getbalance("");
         return response()->json([
-            'balance' => Auth::user()->balance
+            'balance' => number_format(Auth::user()->balance, 8, '.', '')
         ], 200);
     }
 
@@ -72,8 +72,9 @@ class WalletController extends Controller
                 $response = $this->crypto->sendtoaddress($address, $amount);
                 if ($response != false) {
                     
-                    Auth::user()->balance -= $amount + (double)config('constants.withdraw_fee');
-                    Auth::user()->save();
+                    // Auth::user()->balance -= $amount + (double)config('constants.withdraw_fee');
+                    // Auth::user()->save();
+                    Auth::user()->addMoney( - $amount - (double)config('constants.withdraw_fee') );
 
                     // save transaction
                     $transaction = $this->crypto->gettransaction($response);
@@ -104,46 +105,6 @@ class WalletController extends Controller
         ], 400);
     }
 
-    protected function updateBalance(){ // AG3TqTKPw1SviKjAWFNtQMimq4sWZSgUMD
-        $transactions = $this->crypto->listtransactions("");
-        $addresses = Auth::user()->addresses()->get();
-        foreach ($transactions as $transaction) {
-
-            $transactionStored = Transaction::find($transaction['txid']);
-            if($transactionStored == null){
-                foreach ($addresses as $address) {
-                    if($transaction['address'] == $address->address && $transaction['category'] == 'receive'){
-                        $transactionStored = new Transaction();
-                        $transactionStored->txid        = $transaction['txid'];
-                        $transactionStored->address     = $transaction['address'];
-                        $transactionStored->category    = $transaction['category'];
-                        $transactionStored->amount      = $transaction['amount'];
-                        $transactionStored->blockhash   = $transaction['blockhash'];
-                        $transactionStored->blocktime   = $transaction['blocktime'];
-                        $transactionStored->save();
-                        // array_push($result, $transaction);
-                        
-                        Auth::user()->addMoney($transactionStored->amount);
-                    }
-                }
-            }
-            else{
-                // do nothing
-            }
-        }
-        // foreach($transactions as $transaction)
-        // {
-        //     $addresses = Auth::user()->addresses()->get();
-        //     foreach ($addresses as $address) {
-        //         if($transaction['address'] ==  $address)
-        //         {
-        //             array_push($result, $transaction);
-        //         }
-        //     }
-        // }
-        return response()->json([
-            'balance' => Auth::user()->balance,
-        ], 200);
-    }
+    
 
 }
