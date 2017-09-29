@@ -51,7 +51,7 @@ class UpdateUserBalanceCommand extends Command
                 $transactionStored = Transaction::find($transaction['txid']);
                 if($transactionStored == null){
                     foreach ($addresses as $address) {
-                        if($transaction['address'] == $address->address && $transaction['category'] == 'receive'){
+                        if($transaction['address'] == $address->address && $transaction['category'] == 'receive' && (integer)$transaction['confirmations'] >= 3){
                             $transactionStored = new Transaction();
                             $transactionStored->txid        = $transaction['txid'];
                             $transactionStored->address     = $transaction['address'];
